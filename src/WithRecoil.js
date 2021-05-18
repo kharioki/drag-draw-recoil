@@ -29,9 +29,51 @@ export default function WithRecoil() {
             <Create />
             <Boxes />
             <BigNumber />
+            <BoundingBox />
         </RecoilRoot>
     );
 };
+
+const boundingState = selector({
+    key: 'boundingState',
+    get: ({ get }) => {
+        const boxIds = get(boxIdsState);
+        const boxes = boxIds.map((id) =>  get(getBoxState(id)))
+        // console.log({boxes});
+
+        const bounding = boxes.reduce((acc, box) => {
+            if (acc.minX === null || box.x < acc.minX) acc.minX = box.x;
+            if (acc.minY === null || box.y < acc.minY) acc.minY = box.y;
+            if (acc.maxX === null || box.x > acc.maxX) acc.maxX = box.x;
+            if (acc.maxY === null || box.y > acc.maxY) acc.maxY = box.y;
+
+            return acc;
+        }, {
+            minX: null,
+            minY: null,
+            maxX: null,
+            maxY: null,
+        })
+
+        return bounding;
+    }
+});
+
+function BoundingBox() {
+    const bounding = useRecoilValue(boundingState);
+
+    if (bounding.minX === null) return null;
+
+    // console.log(bounding);
+    return <div 
+    className="bounding-box"
+    style={{
+        top: bounding.minY,
+        left: bounding.minX,
+        width: bounding.maxX - bounding.minX + 96,
+        height: bounding.maxY - bounding.minY + 96,
+    }} />
+}
 
 const totalsState = selector({
     key: 'totalState',
@@ -65,7 +107,7 @@ const DrawBox = memo(({ id }) => {
             position={{ x: box.x, y: box.y }}
             onDrag={(e, data) => {
                 setBox({ ...box, x: data.x, y: data.y });
-                console.log({ x: data.x, y: data.y });
+                // console.log({ x: data.x, y: data.y });
             }}
         >
             <div ref={ref} className="box">box</div>
