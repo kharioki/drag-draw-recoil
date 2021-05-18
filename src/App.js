@@ -1,7 +1,9 @@
+import WithRecoil from "./WithRecoil";
+
 function App() {
   return (
     <div className="App">
-      App
+      <WithRecoil />
     </div>
   );
 }
